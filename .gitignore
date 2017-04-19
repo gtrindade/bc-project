@@ -1,1 +1,4 @@
 connect.sh
+.foreverignore
+public/
+node_modules

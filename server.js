@@ -1,22 +1,14 @@
-// Load the necessary servers.
 var http = require( "http" );
  
-// Create our HTTP server.
 var server = http.createServer(
-function( request, response ){
- 
- 
-// Create a SUPER SIMPLE response.
-response.writeHead( 200, {"content-type": "text/plain"} );
-response.write( "Hellow world from AWS!\n" );
-response.end();
- 
- 
-}
+  function( request, response ){
+    fs.readFile('index.html',function (err, data){
+        res.writeHead(200, {'Content-Type': 'text/html','Content-Length':data.length});
+        res.write(data);
+        res.end();
+    });
+  }
 );
  
-// Point the HTTP server to port 8080.
 server.listen( 8080 );
- 
-// For logging....
 console.log( "Server is running on 8080" );

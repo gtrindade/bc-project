@@ -1,0 +1,26 @@
+{
+  "name": "bc-project",
+  "version": "1.0.0",
+  "description": "It's the BC Project",
+  "main": "server.js",
+  "dependencies": {
+    "webpack": "^2.4.1"
+  },
+  "devDependencies": {
+    "webpack-dev-server": "^2.4.2"
+  },
+  "scripts": {
+    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors",
+    "prod": "./node_modules/webpack/bin/webpack.js -p && forever server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gtrindade/bc-project.git"
+  },
+  "author": "Guilherme T. M. Goncalves",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gtrindade/bc-project/issues"
+  },
+  "homepage": "https://github.com/gtrindade/bc-project#readme"
+}
