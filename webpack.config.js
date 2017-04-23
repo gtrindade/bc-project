@@ -1,4 +1,5 @@
 /* eslint no-undef: 0*/
+const path = require('path')
 
 module.exports = {
   entry: {
@@ -7,12 +8,14 @@ module.exports = {
   output: {
     filename: `public/[name].js`
   },
-  resolveLoader: {
-    modulesDirectories: [
-      `./node_modules`
-    ]
-  },
   module: {
+    loaders: [{
+      test: /\.js$/,
+      include: [
+        path.resolve(__dirname, `node_modules`)
+      ],
+      loader: `babel-loader`
+    }],
     rules: [
       {
         test: /\.js$/,
