@@ -1,7 +1,10 @@
 {
   "presets": ["env", "es2015"],
-  "plugins": [["inferno", {
-    "imports": true,
-    "pragma": "" 
-  }]]
+  "plugins": [
+    ["inferno", {
+      "imports": true,
+      "pragma": "" 
+    }],
+    ["transform-object-rest-spread"]
+  ]
 }

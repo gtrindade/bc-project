@@ -1,14 +1,13 @@
 import Inferno from 'inferno'
 import createClass from 'inferno-create-class'
+import Chat from './chat/chat'
 
 const App = createClass({
-  componentDidMount() {
-    console.log(`component mounted`)
-  },
   render(props, state) {
     return(
       <div>
         <h1>BC Project</h1>
+        <Chat/>
       </div>
     )
   }
