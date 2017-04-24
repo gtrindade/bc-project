@@ -1,7 +1,8 @@
-var http = require( "http" );
+var fs = require( "fs" );
+var restify = require( "restify" );
+var app = restify.createServer();
  
-var server = http.createServer(
-  function( request, response ){
+app.get('/', function( req, res ){
     fs.readFile('index.html',function (err, data){
         res.writeHead(200, {'Content-Type': 'text/html','Content-Length':data.length});
         res.write(data);
@@ -10,5 +11,9 @@ var server = http.createServer(
   }
 );
  
-server.listen( 8080 );
+app.get(/\/public\/?.*/, restify.serveStatic({
+    directory: __dirname
+}));
+
+app.listen( 8080 );
 console.log( "Server is running on 8080" );
