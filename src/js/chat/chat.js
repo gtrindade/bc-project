@@ -6,18 +6,23 @@ const Chat = createClass({
     message: ``,
     history: []
   }),
-  handleChange(e) {
-    const {target: {value}} = e
-    this.setState({
-      ...this.state,
-      message: value
-    })
-  },
   handleSubmit() {
     const {history, message} = this.state
     this.setState({
       message: ``,
       history: history.concat(message)
+    })
+  },
+  handleKeyPress(e) {
+    const {key} = e
+    console.log(`state`, this.state)
+    if (key === `Enter`) {
+      this.handleSubmit()
+    }
+    const {target: {value}} = e
+    this.setState({
+      ...this.state,
+      message: value
     })
   },
   render() {
@@ -28,10 +33,12 @@ const Chat = createClass({
         <div className="chat-log">
           { history.map((msg) => <div>{msg}</div> )}
         </div>
-        <form action="#" onSubmit={this.handleSubmit}>
-          <input type="text" value={message} onChange={this.handleChange}/>
-          <input type="submit" value="submit"/>
-        </form>
+        <input
+          type="text"
+          value={message}
+          onKeyPress={this.handleKeyPress}
+        />
+        <input type="submit" value="submit" onClick={this.handleSubmit}/>
       </div>
     )
   }
