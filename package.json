@@ -7,7 +7,9 @@
     "inferno": "^3.0.5",
     "inferno-create-class": "^3.0.5",
     "inferno-dom": "^1.0.7",
+    "ramda": "^0.23.0",
     "restify": "^4.3.0",
+    "socket.io": "^1.7.3",
     "webpack": "^2.4.1"
   },
   "devDependencies": {
@@ -23,7 +25,7 @@
     "webpack-dev-server": "^2.4.2"
   },
   "scripts": {
-    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors",
+    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 3000",
     "build": "./node_modules/webpack/bin/webpack.js",
     "prod": "./node_modules/webpack/bin/webpack.js -p && forever server.js"
   },

@@ -5,13 +5,14 @@ extends: 'eslint:recommended'
 parserOptions:
   ecmaFeatures:
     jsx: true
+    experimentalObjectRestSpread: true
   sourceType: module
 plugins:
   - inferno
 rules:
   inferno/jsx-uses-inferno: error
   inferno/jsx-uses-vars: error
-  no-console: false
+  no-console: 0
   indent:
     - error
     - 2
