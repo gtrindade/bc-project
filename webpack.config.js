@@ -1,4 +1,6 @@
-/* eslint no-undef: 0*/
+/* eslint no-undef: 0 */
+/* eslint quotes: 0 */
+
 const path = require('path')
 
 module.exports = {

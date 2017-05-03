@@ -1,11 +1,13 @@
-const fs = require( "fs" )
-const restify = require( "restify" )
+import fs from 'fs'
+import restify from 'restify'
+import R from 'ramda'
+import socketIo from 'socket.io'
+
 const app = restify.createServer()
-const io = require("socket.io")(app.server)
-const R = require("ramda")
+const io = socketIo(app.server)
  
 app.get(`/`, function( req, res ){
-  fs.readFile('index.html',function (err, data){
+  fs.readFile(`index.html`,function (err, data){
     res.writeHead(200, {
       [`Content-Type`]: `text/html`,
       [`Content-Length`]: data.length
@@ -15,9 +17,7 @@ app.get(`/`, function( req, res ){
   })}
 )
  
-app.get(/\/public\/?.*/, restify.serveStatic({
-    directory: __dirname
-}))
+app.get(/\/public\/?.*/, restify.serveStatic({ directory: __dirname }))
 
 const MESSAGE = `message`
 const CONNECT = `connection`

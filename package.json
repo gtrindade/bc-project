@@ -25,9 +25,11 @@
     "webpack-dev-server": "^2.4.2"
   },
   "scripts": {
-    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 3000",
-    "build": "./node_modules/webpack/bin/webpack.js",
-    "prod": "./node_modules/webpack/bin/webpack.js -p && forever server.js"
+    "dev": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 3000",
+    "build": "npm run build-fe && npm run build-be",
+    "build-fe": "./node_modules/webpack/bin/webpack.js",
+    "build-be": "./node_modules/babel-cli/bin/babel.js server.js --out-file dist/server-compiled.js",
+    "start": "npm run build && forever dist/server-compiled.js"
   },
   "repository": {
     "type": "git",

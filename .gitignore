@@ -1,5 +1,7 @@
 connect.sh
 .foreverignore
 public/
+dist/
 node_modules
 npm-debug.log
+server-compiled.js
