@@ -1,0 +1,32 @@
+.input-container {
+  display: flex;
+
+  input {
+    padding: 5px 0;
+  }
+}
+
+.name-field {
+  flex-grow: 0.5;
+  margin-right: 10px;
+}
+
+.message-field {
+  flex-grow: 4;
+  margin-right: 10px;
+}
+
+.submit-button {
+  flex-grow: 0.5;
+}
+
+.chat-log {
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 15px 0;
+  overflow-y: scroll;
+  height: 400px;
+  div {
+    padding: 5px;
+  }
+}

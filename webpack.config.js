@@ -2,11 +2,13 @@
 /* eslint quotes: 0 */
 
 const path = require('path')
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 module.exports = {
-  entry: {
-    bundle: `./src/js/index.js`
-  },
+  entry: [
+    `./src/main.js`,
+    `./src/main.scss`
+  ],
   output: {
     filename: `public/[name].js`
   },
@@ -28,7 +30,19 @@ module.exports = {
             presets: [`env`, `es2015`]
           }
         }
+      }, {
+        test: /\.(sass|scss)$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader', 'sass-loader']
+        })
       }
     ]
-  }
+  },
+  plugins: [
+    new ExtractTextPlugin({
+      filename: 'public/[name].bundle.css',
+      allChunks: true,
+    }),
+  ]
 }
