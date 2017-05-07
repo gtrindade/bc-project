@@ -3,6 +3,14 @@ import restify from 'restify'
 import R from 'ramda'
 import socketIo from 'socket.io'
 
+const serverPort = process.env.OPENSHIFT_NODEJS_PORT || 8080
+const serverIpAddress = process.env.OPENSHIFT_NODEJS_IP || `127.0.0.1`
+
+const dbName = `bc`
+const mongoHost = `mongodb://127.0.0.1:27017/` || process.env.OPENSHIFT_MONGODB_DB_URL
+const mongoUrl = mongoHost + dbName
+console.log(`mongo url: ` + mongoUrl)
+
 const app = restify.createServer()
 const io = socketIo(app.server)
  
@@ -41,5 +49,5 @@ const messageHandler = R.curry((socket, msg, name) => {
 
 io.on(CONNECT, connectionHandler)
 
-app.listen( 8080 )
+app.listen( serverPort, serverIpAddress )
 console.log( `Server is running on 8080` )
