@@ -10,7 +10,7 @@ module.exports = {
     `./src/main.scss`
   ],
   output: {
-    filename: `public/[name].js`
+    filename: `./dist/public/[name].js`
   },
   module: {
     loaders: [{
@@ -41,7 +41,7 @@ module.exports = {
   },
   plugins: [
     new ExtractTextPlugin({
-      filename: 'public/[name].bundle.css',
+      filename: './dist/public/[name].bundle.css',
       allChunks: true,
     }),
   ]
