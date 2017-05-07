@@ -34,7 +34,7 @@
     "build": "npm run build-fe && npm run build-be",
     "build-fe": "./node_modules/webpack/bin/webpack.js",
     "build-be": "./node_modules/babel-cli/bin/babel.js server.js --out-file ./dist/server.js",
-    "start": "npm run build && forever ./dist/server.js"
+    "start": "npm run build && node ./dist/server.js"
   },
   "repository": {
     "type": "git",
