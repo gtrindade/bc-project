@@ -2,7 +2,7 @@
   "name": "bc-project",
   "version": "1.0.0",
   "description": "It's the BC Project",
-  "main": "server.js",
+  "main": "./dist/server.js",
   "dependencies": {
     "ramda": "^0.23.0",
     "react": "^15.5.4",
