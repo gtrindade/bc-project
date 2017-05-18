@@ -4,6 +4,7 @@
   "description": "It's the BC Project",
   "main": "./dist/server.js",
   "dependencies": {
+    "mongodb": "^2.2.26",
     "ramda": "^0.23.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
