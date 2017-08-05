@@ -5,6 +5,7 @@
   "main": "./dist/server.js",
   "dependencies": {
     "mongodb": "^2.2.26",
+    "precommit-hook-eslint": "^3.0.0",
     "ramda": "^0.23.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
@@ -35,7 +36,9 @@
     "build": "npm run build-fe && npm run build-be",
     "build-fe": "./node_modules/webpack/bin/webpack.js",
     "build-be": "./node_modules/babel-cli/bin/babel.js server.js --out-file ./dist/server.js",
-    "start": "npm run build && node ./dist/server.js"
+    "start": "npm run build && node ./dist/server.js",
+    "lint": "eslint .",
+    "validate": "npm ls"
   },
   "repository": {
     "type": "git",
@@ -46,5 +49,10 @@
   "bugs": {
     "url": "https://github.com/gtrindade/bc-project/issues"
   },
-  "homepage": "https://github.com/gtrindade/bc-project#readme"
+  "homepage": "https://github.com/gtrindade/bc-project#readme",
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
 }
