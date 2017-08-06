@@ -25,8 +25,10 @@ const Chat = React.createClass({
 
   handleSubmit() {
     const {message, name} = this.state
-    this.state.socket.emit(`message`, message, name)
-    this.setState({ message: `` })
+    if (name) {
+      this.state.socket.emit(`message`, name, message)
+      this.setState({ message: `` })
+    }
   },
 
   handleNameChange(e) {

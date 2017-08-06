@@ -4,6 +4,7 @@
   "description": "It's the BC Project",
   "main": "./dist/server.js",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "mongodb": "^2.2.26",
     "precommit-hook-eslint": "^3.0.0",
     "ramda": "^0.23.0",
@@ -35,7 +36,7 @@
     "dev": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 3000",
     "build": "npm run build-fe && npm run build-be",
     "build-fe": "./node_modules/webpack/bin/webpack.js",
-    "build-be": "./node_modules/babel-cli/bin/babel.js server.js --out-file ./dist/server.js",
+    "build-be": "./node_modules/babel-cli/bin/babel.js src/be --out-dir=./dist",
     "start": "npm run build && node ./dist/server.js",
     "lint": "eslint .",
     "validate": "npm ls"
