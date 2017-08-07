@@ -3,8 +3,7 @@ import Promise from 'bluebird'
 Promise.promisifyAll(MongoClient)
 
 const dbName = `bc`
-const mongoHost = `mongodb://127.0.0.1:27017/`
-const mongoUrl = mongoHost + dbName
+const mongoUrl = process.env.MONGODB_URI || `mongodb://127.0.0.1:27017/` + dbName
 
 export let db
 export const client = MongoClient
