@@ -1,32 +1,22 @@
 import {db} from '../db'
+import {ObjectId} from 'mongodb'
 
-const getAll = () =>
-  db.collection(`messages`).find({}).toArray()
-
-const insert = (name, msg) =>
-  db.collection(`messages`).insert({name, msg})
+const getAll = () => db.collection(`messages`).find({}).toArray()
+const insert = (name, msg) => {
+  if ( name && msg ) {
+    return db.collection(`messages`).insert({name, msg})
+  }
+  return Promise.reject(new Error(`Invalid name (${name}) or message (${msg})`))
+}
+const update = (_id, name, msg) => {
+  if ( _id && name && msg ) {
+    return db.collection(`messages`).update({_id: ObjectId(_id)}, {name, msg})
+  }
+  return Promise.reject(new Error(`Invalid name (${name}) or message (${msg})`))
+}
 
 export default {
   getAll,
-  insert
+  insert,
+  update
 }
-
-/*
-  db.collection(`messages`).find({}).toArray((err, result) => {
-    if (err) {
-      console.log(`err`, err)
-      return err
-    }
-    
-    return result || []
-  })
-
-  db.collection(`messages`).insert({name, msg}, (err, result) => {
-    if (err) {
-      console.log(`err`, err)
-      return err
-    }
-    console.log(`Inserted sucessfully into the database`, result.ops)
-  })
-
- */

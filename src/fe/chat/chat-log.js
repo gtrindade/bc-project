@@ -11,6 +11,10 @@ const ChatLog = React.createClass({
     }
   },
 
+  formatMessage(name, message) {
+    return `[${name}]: ${message}`
+  },
+
   componentDidUpdate() {
     const {box} = this.refs
     if (this.shouldAutoScroll) {
@@ -23,11 +27,20 @@ const ChatLog = React.createClass({
     this.shouldAutoScroll = box.scrollHeight - (box.scrollTop + box.offsetHeight) <= 10
   },
 
+  renderLog(log, handler) {
+    const renderer = ({name, msg, _id}, i) => (
+      <div key={i} onClick={handler} id={_id}>
+        {this.formatMessage(name, msg)}
+      </div> 
+    )
+    return log.map(renderer)
+  },
+
   render() {
-    const {log} = this.props
+    const {log, handleEdit} = this.props
     return (
       <div className="chat-log" ref="box">
-        { log.map((msg, i) => <div key={i}>{msg}</div> )}
+        {this.renderLog(log, handleEdit)}
       </div>
     )
   }

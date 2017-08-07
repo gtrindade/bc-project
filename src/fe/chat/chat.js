@@ -3,31 +3,57 @@ import io from 'socket.io-client'
 import ChatLog from './chat-log'
 
 const MESSAGE = `message`
+const MESSAGES = `messages`
+const UPDATE = `update`
+const unformatRegex = /\[(.*)\]:\ (.*)/
 
 const Chat = React.createClass({
   getInitialState() {
     return {
-      message: ``,
+      msg: ``,
       name: ``,
       history: []
     }
   },
 
-  componentDidMount() {
-    const socket = io()
-    socket.on(MESSAGE, (msg) => {
-      this.setState({
-        history: this.state.history.concat(msg)
+  appendToHistory(message) {
+    this.setState({
+      history: this.state.history.concat(message)
+    })
+  },
+
+  updateHistory(message) {
+    const {history} = this.state
+    this.setState({
+      history: history.map((log) => {
+        if (log._id == message._id) {
+          return message
+        }
+        return log
       })
     })
+  },
+
+  componentDidMount() {
+    const socket = io()
+    socket.on(MESSAGE, this.appendToHistory)
+    socket.on(MESSAGES, this.appendToHistory)
+    socket.on(UPDATE, this.updateHistory)
     this.setState({ socket })
   },
 
   handleSubmit() {
-    const {message, name} = this.state
+    const {msg, name, _id} = this.state
+    const editMode = !!_id
     if (name) {
-      this.state.socket.emit(`message`, name, message)
-      this.setState({ message: `` })
+      const action = editMode ? UPDATE : MESSAGE
+      this.state.socket.emit(action, {name, msg, _id})
+      const newName = editMode ? `` : name
+      this.setState({
+        msg: ``,
+        name: newName,
+        _id: undefined
+      })
     }
   },
 
@@ -38,7 +64,7 @@ const Chat = React.createClass({
 
   handleMessageChange(e) {
     const {target: {value}} = e
-    this.setState({ message: value })
+    this.setState({ msg: value })
   },
 
   handleKeyPress(e) {
@@ -48,32 +74,41 @@ const Chat = React.createClass({
     }
   },
 
+  handleEdit(e) {
+    const {target} = e
+    const [,name, msg] = target.innerHTML.match(unformatRegex)
+    const {id} = target
+    this.setState({ name, msg, _id: id})
+  },
+
   render() {
-    const {history, message, name} = this.state
+    const {history, msg, name, _id} = this.state
+    const editMode = !!_id
+    const editClass = editMode ? `edit-mode` : ``
 
     return(
       <div>
         <h3>Chat</h3>
-        <ChatLog log={history}/>
+        <ChatLog log={history} handleEdit={this.handleEdit}/>
         <div className="input-container">
           <input
             type="text"
             value={name}
             placeholder="Name..."
             onChange={this.handleNameChange}
-            className="name-field"
+            className={`name-field ${editClass}`}
           /> 
           <input
             type="text"
-            value={message}
+            value={msg}
             placeholder="Message..."
             onChange={this.handleMessageChange}
             onKeyDown={this.handleKeyPress}
-            className="message-field"
+            className={`message-field ${editClass}`}
           />
           <input
             type="submit"
-            value="submit"
+            value={editMode ? `update` : `submit`}
             onClick={this.handleSubmit}
             className="submit-button"
           />
