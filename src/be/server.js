@@ -3,8 +3,8 @@ import restify from 'restify'
 import db from './db'
 import message from './services/message'
 
-const serverPort = 8080
-const serverIpAddress = `127.0.0.1`
+const serverPort = process.env.PORT || 8080
+const serverIpAddress = `0.0.0.0`
 
 export const app = restify.createServer()
  
@@ -24,6 +24,6 @@ db.init().then(() => {
   message.init(app)
 
   app.listen( serverPort, serverIpAddress )
-  console.log( `Server is running on 8080` )
+  console.log( `Server is running on ${serverPort}` )
 })
 
