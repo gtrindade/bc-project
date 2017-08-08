@@ -1,7 +1,12 @@
 // const rollRegex = /(\d+)(d)(\d+)([+|-])(\d+)/
 const rollRegex = /(\d+)(d)(\d+)\ *([+|-])?\ *(\d*)/
 
-const rollDie = (sides) => Math.floor(Math.random() * sides + 1) 
+const rollDie = (sides) => {
+  const random = Math.random()
+  const result = Math.floor(random * sides + 1)
+  return Math.min(result, sides)
+}
+
 const rollDice = (dice, sides) => {
   if (dice === 1) {
     return rollDie(sides)
@@ -23,7 +28,7 @@ const applyModifier = (operator, modifier) => {
   }
   return operator === `-` ? -value : value
 }
-const formatDice = (dice) => dice.length > 1 ? `[${dice}]` : dice
+const formatDice = (dice) => dice.length > 1 ? `[${dice.join(`, `)}]` : dice
 const formatRollResult = (name, roll, dice, operator, modifier, total) => {
   const modString = hasOperator(operator) ? ` ${operator} ${modifier}` : ``
   const manyDice = dice.length > 1
