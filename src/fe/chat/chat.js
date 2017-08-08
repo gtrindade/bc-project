@@ -16,6 +16,12 @@ const Chat = React.createClass({
     }
   },
 
+  replaceHistory(message) {
+    this.setState({
+      history: message
+    })
+  },
+
   appendToHistory(message) {
     this.setState({
       history: this.state.history.concat(message)
@@ -37,7 +43,7 @@ const Chat = React.createClass({
   componentDidMount() {
     const socket = io()
     socket.on(MESSAGE, this.appendToHistory)
-    socket.on(MESSAGES, this.appendToHistory)
+    socket.on(MESSAGES, this.replaceHistory)
     socket.on(UPDATE, this.updateHistory)
     this.setState({ socket })
   },
