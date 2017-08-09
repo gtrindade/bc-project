@@ -22,6 +22,13 @@ const rollDice = (dice, sides) => {
 const hasOperator = (operator) => operator === `+` || operator === `-`
 const invalidOperator = (operator) => operator && operator !== `+` && operator !== `-`
 const sumResults = (results) => results.reduce((total, value) => total + value, 0)
+const getModifier = (modifier) => {
+  const parsed = parseInt(modifier)
+  if (Number.isNaN(parsed)) {
+    return 0
+  }
+  return parsed
+}
 const applyModifier = (operator, modifier) => operator === `-` ? -modifier : modifier
 const formatDice = (dice) => dice.length > 1 ? `[${dice.join(`, `)}]` : dice
 const formatRollResult = (name, roll, dice, operator, modifier, total) => {
@@ -46,7 +53,7 @@ const roll = (name, roll) => {
     if (dice > maxDice || sides > maxSides) {
       return aboveLimit
     }
-    const modifierValue = parseInt(modifier)
+    const modifierValue = getModifier(modifier)
     if (!Number.isSafeInteger(modifierValue)) {
       return modifierTooBig
     }
