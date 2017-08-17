@@ -1,4 +1,4 @@
-import dice from './dice'
+import dice from '../dice/dice'
 
 const PREFIX = `/`
 

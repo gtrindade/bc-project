@@ -1,11 +1,11 @@
 import React from 'react'
 import io from 'socket.io-client'
 import ChatLog from './chat-log'
+import {
+  MESSAGE, MESSAGES, MESSAGES_FROM, UPDATE, DISCONNECT, CONNECT
+} from '../constants'
 
-const MESSAGE = `message`
-const MESSAGES = `messages`
-const UPDATE = `update`
-const unformatRegex = /\[(.*)\]:\ (.*)/
+export const unformatRegex = /\[(.*)\]:\ (.*)/
 
 const Chat = React.createClass({
   getInitialState() {
@@ -16,9 +16,29 @@ const Chat = React.createClass({
     }
   },
 
-  replaceHistory(message) {
+  reset() {
     this.setState({
-      history: message
+      _id: undefined,
+      name: ``,
+      msg: ``
+    })
+  },
+
+  clearHistory() {
+    this.setState({
+      history: []
+    })
+  },
+
+  replaceHistory(messages) {
+    this.setState({
+      history: messages
+    })
+  },
+
+  prependToHistory(messages) {
+    this.setState({
+      history: [...messages, ...this.state.history]
     })
   },
 
@@ -40,11 +60,27 @@ const Chat = React.createClass({
     })
   },
 
+  disconnectHandler() {
+    this.clearHistory()
+    this.setState({
+      connected: false
+    })
+  },
+
+  connectHandler() {
+    this.setState({
+      connected: true
+    })
+  },
+
   componentDidMount() {
     const socket = io()
     socket.on(MESSAGE, this.appendToHistory)
     socket.on(MESSAGES, this.replaceHistory)
+    socket.on(MESSAGES_FROM, this.prependToHistory)
     socket.on(UPDATE, this.updateHistory)
+    socket.on(DISCONNECT, this.disconnectHandler)
+    socket.on(CONNECT, this.connectHandler)
     this.setState({ socket })
   },
 
@@ -52,14 +88,19 @@ const Chat = React.createClass({
     const {msg, name, _id} = this.state
     const editMode = !!_id
     if (name) {
-      const action = editMode ? UPDATE : MESSAGE
-      this.state.socket.emit(action, {name, msg, _id})
-      const newName = editMode ? `` : name
-      this.setState({
-        msg: ``,
-        name: newName,
-        _id: undefined
-      })
+      const {socket} = this.state
+      const message = {name, msg, _id}
+      if (editMode) {
+        socket.emit(UPDATE, message)
+        this.reset()
+      } else {
+        socket.emit(MESSAGE, message)
+        this.setState({
+          msg: ``,
+          name: name,
+          _id: undefined
+        })
+      }
     }
   },
 
@@ -78,6 +119,9 @@ const Chat = React.createClass({
     if (key === `Enter`) {
       this.handleSubmit()
     }
+    if (key === `Escape`) {
+      this.setState({ name: ``, msg: ``, _id: undefined })
+    }
   },
 
   handleEdit(e) {
@@ -85,17 +129,18 @@ const Chat = React.createClass({
     const [,name, msg] = target.innerHTML.match(unformatRegex)
     const {id} = target
     this.setState({ name, msg, _id: id})
+    this.inputMessage.focus()
   },
 
   render() {
-    const {history, msg, name, _id} = this.state
+    const {history, msg, name, _id, socket} = this.state
     const editMode = !!_id
     const editClass = editMode ? `edit-mode` : ``
 
     return(
       <div>
         <h3>Chat</h3>
-        <ChatLog log={history} handleEdit={this.handleEdit}/>
+        <ChatLog log={history} handleEdit={this.handleEdit} socket={socket}/>
         <div className="input-container">
           <input
             type="text"
@@ -111,6 +156,7 @@ const Chat = React.createClass({
             onChange={this.handleMessageChange}
             onKeyDown={this.handleKeyPress}
             className={`message-field ${editClass}`}
+            ref={(ref) => {this.inputMessage = ref}}
           />
           <input
             type="submit"

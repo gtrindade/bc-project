@@ -1,7 +1,7 @@
 import fs from 'fs'
 import restify from 'restify'
 import db from './db'
-import message from './services/message'
+import message from './services/message/message'
 
 const serverPort = process.env.PORT || 8080
 const serverIpAddress = `0.0.0.0`

@@ -1,13 +1,14 @@
 import R from 'ramda'
 import socketIo from 'socket.io'
 import dao from './message-dao'
-import commands from './commands'
+import commands from '../commands/commands'
 
 export const init = (app) => {
   const io = socketIo(app.server)
 
   const MESSAGE = `message`
-  const MESSAGES = `messages`
+  // const MESSAGES = `messages`
+  const MESSAGES_FROM = `messages from`
   const UPDATE = `update`
   const CONNECT = `connection`
   const DISCONNECT = `disconnect`
@@ -19,11 +20,12 @@ export const init = (app) => {
   const connectionHandler = (socket) => {
     console.log(`User ${socket.id} connected`)
 
-    dao.getAll()
+    dao.getPaginatedFromTime()
       .then((result) => {
-        io.emit(MESSAGES, result)
+        io.emit(MESSAGES_FROM, result)
         socket.on(MESSAGE, messageHandler)
         socket.on(UPDATE, updateHandler)
+        socket.on(MESSAGES_FROM, paginatedMessagesHandler)
         socket.on(DISCONNECT, disconnectHandler(socket))
       })
       .catch(console.error)
@@ -32,8 +34,7 @@ export const init = (app) => {
   const updateHandler = ({name, msg, _id}) => {
     console.log(`update: [${name}]: `, msg, _id)
     dao.update(_id, name, msg)
-      .then((result) => {
-        console.log(`result`, result)
+      .then(() => {
         io.emit(UPDATE, {name, msg, _id})
       })
       .catch(console.error)
@@ -55,6 +56,16 @@ export const init = (app) => {
             })
             .catch(console.error)
         }
+      })
+      .catch(console.error)
+  }
+
+  const paginatedMessagesHandler = (time) => {
+    console.log(`time`, time)
+    dao.getPaginatedFromTime(time)
+      .then((result) => {
+        console.log(`result`, result)
+        io.emit(MESSAGES_FROM, result)
       })
       .catch(console.error)
   }
