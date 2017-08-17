@@ -22,12 +22,24 @@ const ChatLog = React.createClass({
   },
 
   handleMessagesFrom(result) {
+    const {box} = this.refs
+    const {scrollHeight} = this.state
+    const deltaHeight = box.scrollHeight - scrollHeight
     if (result && result.length > 0) {
-      const {box} = this.refs
-      box.scrollTop = 200
-      this.setState({loadHistoryText: LOAD_MORE})
+      const atTop = box.scrollTop < 10
+      if (atTop) {
+        box.scrollTop = deltaHeight
+      }
+      this.setState({
+        loadHistoryText: LOAD_MORE,
+        scrollHeight: box.scrollHeight,
+        loading: false
+      })
     } else {
-      this.setState({loadHistoryText: BEGINNING})
+      this.setState({
+        loadHistoryText: BEGINNING,
+        loading: false
+      })
     }
   },
 
@@ -42,25 +54,33 @@ const ChatLog = React.createClass({
 
   handleScroll: function(event) {
     const {log, socket} = this.props
-    const {loadHistoryText} = this.state
+    const {loadHistoryText, loading} = this.state
     const {scrollTop} = event.target
 
     const [oldest] = log
     const atTop = scrollTop < 10
     const notBeginning = loadHistoryText !== BEGINNING
     const hasTime = oldest && oldest.time
+    const notLoading = !loading
 
-    if (atTop && hasTime && notBeginning) {
-      clearTimeout(this.timeout)
-      this.timeout = setTimeout(() => {
-        socket.emit(MESSAGES_FROM, oldest.time)
-      }, 1000)
+    if (atTop && hasTime && notBeginning && notLoading) {
+      socket.emit(MESSAGES_FROM, oldest.time)
+      this.setState({
+        loading: true
+      })
     }
   },
 
   componentWillUpdate() {
     const {box} = this.refs
     this.shouldAutoScroll = box.scrollHeight - (box.scrollTop + box.offsetHeight) <= 10
+  },
+
+  componentDidMount() {
+    const {box} = this.refs
+    this.setState({
+      scrollHeight: box.scrollHeight
+    })
   },
 
   renderLog(log, handler) {
