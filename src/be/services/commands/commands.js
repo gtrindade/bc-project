@@ -16,8 +16,8 @@ const evaluate = (name, msg) => {
           return dice.roll(name, input)
         }
         case `set`: {
-          const [,path, value] = tokens
-          return gamestate.set(path, value)
+          const [,path, ...value] = tokens
+          return gamestate.set(path, value.join(` `))
         }
         case `get`: {
           const [,path] = tokens
