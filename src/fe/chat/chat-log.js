@@ -12,7 +12,6 @@ const ChatLog = React.createClass({
   getInitialState() {
     return {
       loading: false,
-      scrollTop: 0,
       loadHistoryText: LOAD_MORE
     }
   },
@@ -46,7 +45,8 @@ const ChatLog = React.createClass({
   componentDidUpdate() {
     const {box} = this.refs
     const {socket} = this.props
-    if (this.shouldAutoScroll) {
+    const {shouldAutoScroll} = this.state
+    if (shouldAutoScroll) {
       box.scrollTop = box.scrollHeight
     }
     socket.on(MESSAGES_FROM, this.handleMessagesFrom)
@@ -73,7 +73,13 @@ const ChatLog = React.createClass({
 
   componentWillUpdate() {
     const {box} = this.refs
-    this.shouldAutoScroll = box.scrollHeight - (box.scrollTop + box.offsetHeight) <= 10
+    const {shouldAutoScroll} = this.state
+    const newShouldAutoScroll = box.scrollHeight - (box.scrollTop + box.offsetHeight) <= 10
+    if (shouldAutoScroll != newShouldAutoScroll) {
+      this.setState({
+        shouldAutoScroll: newShouldAutoScroll
+      })
+    }
   },
 
   componentDidMount() {
@@ -103,7 +109,11 @@ const ChatLog = React.createClass({
   },
 
   render() {
-    const {log, handleEdit} = this.props
+    const {log, handleEdit, scrollToBottom} = this.props
+    const {box} = this.refs
+    if (box && box.scrollTop && scrollToBottom) {
+      box.scrollTop = 0
+    }
     return (
       <div onScroll={this.handleScroll} className="chat-log" ref="box">
         {this.renderLog(log, handleEdit)}

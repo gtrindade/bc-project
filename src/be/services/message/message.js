@@ -1,4 +1,3 @@
-import R from 'ramda'
 import socketIo from 'socket.io'
 import dao from './message-dao'
 import commands from '../commands/commands'
@@ -13,9 +12,9 @@ export const init = (app) => {
   const CONNECT = `connection`
   const DISCONNECT = `disconnect`
 
-  const disconnectHandler = R.curry((socket, event) => {
+  const disconnectHandler = (socket) => (event) => {
     console.log(`[${event}] user ${socket.id} disconnected`)
-  })
+  }
 
   const connectionHandler = (socket) => {
     console.log(`User ${socket.id} connected`)
@@ -43,28 +42,28 @@ export const init = (app) => {
   const messageHandler = ({name, msg}) => {
     console.log(`[${name}]: `, msg)
 
-    const result = commands.evaluate(name, msg)
+    const command = commands.evaluate(name, msg)
 
     dao.insert(name, msg)
       .then((created) => {
         const [message] = created.ops
         io.emit(MESSAGE, message)
-        if (result) {
-          dao.insert(result.name, result.msg)
-            .then(() => {
-              io.emit(MESSAGE, result)
-            })
-            .catch(console.error)
+        if (command) {
+          command.then((result) => {
+            dao.insert(result.name, result.msg)
+              .then(() => {
+                io.emit(MESSAGE, result)
+              })
+              .catch(console.error)
+          })
         }
       })
       .catch(console.error)
   }
 
   const paginatedMessagesHandler = (time) => {
-    console.log(`time`, time)
     dao.getPaginatedFromTime(time)
       .then((result) => {
-        console.log(`result`, result)
         io.emit(MESSAGES_FROM, result)
       })
       .catch(console.error)

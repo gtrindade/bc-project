@@ -7,7 +7,6 @@
     "bluebird": "^3.5.0",
     "mongodb": "^2.2.26",
     "precommit-hook-eslint": "^3.0.0",
-    "ramda": "^0.23.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "restify": "^4.3.0",

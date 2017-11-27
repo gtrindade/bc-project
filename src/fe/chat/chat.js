@@ -19,7 +19,6 @@ const Chat = React.createClass({
   reset() {
     this.setState({
       _id: undefined,
-      name: ``,
       msg: ``
     })
   },
@@ -84,10 +83,20 @@ const Chat = React.createClass({
     this.setState({ socket })
   },
 
+  getLastMessage() {
+    const {history, name} = this.state
+    const length = history.length
+    for (let i = length - 1; i >= 0; i--) {
+      if (name === history[i].name) {
+        return history[i]
+      }
+    }
+  },
+
   handleSubmit() {
     const {msg, name, _id} = this.state
     const editMode = !!_id
-    if (name) {
+    if (name && msg) {
       const {socket} = this.state
       const message = {name, msg, _id}
       if (editMode) {
@@ -96,10 +105,16 @@ const Chat = React.createClass({
       } else {
         socket.emit(MESSAGE, message)
         this.setState({
+          _id: undefined,
+          scrollToBottom: true,
           msg: ``,
-          name: name,
-          _id: undefined
+          name
         })
+        setTimeout(() => {
+          this.setState({
+            scrollToBottom: false
+          })
+        }, 500)
       }
     }
   },
@@ -115,12 +130,32 @@ const Chat = React.createClass({
   },
 
   handleKeyPress(e) {
+    const {name, _id} = this.state
     const {key} = e
-    if (key === `Enter`) {
-      this.handleSubmit()
-    }
-    if (key === `Escape`) {
-      this.setState({ name: ``, msg: ``, _id: undefined })
+    let last
+    switch (key) {
+      case `ArrowUp`:
+        if (!name) return
+        last = this.getLastMessage()
+        this.setState({
+          name: last.name,
+          msg: last.msg,
+          _id: last._id
+        }, () => {
+          this.inputMessage.blur()
+          setTimeout(() => {
+            this.inputMessage.focus()
+          }, 200)
+        })
+        break
+      case `Enter`:
+        this.handleSubmit()
+        break
+      case `Escape`:
+        if (_id) {
+          this.setState({ msg: ``, _id: undefined })
+        }
+        break
     }
   },
 
@@ -133,14 +168,19 @@ const Chat = React.createClass({
   },
 
   render() {
-    const {history, msg, name, _id, socket} = this.state
+    const {history, msg, name, _id, socket, scrollToBottom} = this.state
     const editMode = !!_id
     const editClass = editMode ? `edit-mode` : ``
 
     return(
       <div>
         <h3>Chat</h3>
-        <ChatLog log={history} handleEdit={this.handleEdit} socket={socket}/>
+        <ChatLog
+          log={history}
+          handleEdit={this.handleEdit}
+          socket={socket}
+          scrollToBottom={scrollToBottom}
+        />
         <div className="input-container">
           <input
             type="text"

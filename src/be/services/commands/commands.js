@@ -1,4 +1,5 @@
 import dice from '../dice/dice'
+import gamestate from '../game-state/game-state'
 
 const PREFIX = `/`
 
@@ -11,7 +12,16 @@ const evaluate = (name, msg) => {
       const command = tokens[0].substring(1, tokens[0].length)
       switch (command) {
         case `roll`: {
-          return dice.roll(name, tokens.slice(1, tokens.length).join(` `))
+          const input = tokens.slice(1, tokens.length).join(` `)
+          return dice.roll(name, input)
+        }
+        case `set`: {
+          const [,path, value] = tokens
+          return gamestate.set(path, value)
+        }
+        case `get`: {
+          const [,path] = tokens
+          return gamestate.get(path)
         }
       }
     }
