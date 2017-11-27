@@ -22,9 +22,10 @@ const get = (path) => {
 }
 
 const set = (path, value) => {
-  if ( path && value ) {
+  const [base] = path.split(`.`)
+  if ( path && value && base ) {
     return db.collection(GAME_STATE).update(
-      {[path]: {$exists: true}},
+      {[base]: {$exists: true}},
       {$set: {[path]: value}},
       {upsert: true}
     ).then(() => getMessage(`Succesfully set ${value} to ${path}`))
