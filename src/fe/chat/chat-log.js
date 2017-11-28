@@ -93,10 +93,13 @@ const ChatLog = React.createClass({
     const {socket} = this.props
     if (socket && socket.connected) {
       const {loadHistoryText} = this.state
-      const renderer = ({name, msg, _id}, i) => (
+      const renderer = ({name, msg, _id, response, editCount}, i) => (
         <div key={i} onClick={handler} id={_id}>
-          {this.formatMessage(name, msg)}
-        </div> 
+          <div>
+            <span>{this.formatMessage(name, msg)}</span>{response && editCount ? <i className="edit-count">{editCount}</i> : null}
+          </div>
+          {response ? <pre className="response">{response}</pre> : null}
+        </div>
       )
       return (
         <div>

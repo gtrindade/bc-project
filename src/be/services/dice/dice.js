@@ -39,22 +39,18 @@ const applyModifier = (operator, modifier) => operator === `-` ? -modifier : mod
 
 const formatDice = (dice) => dice.length > 1 ? `[${dice.join(`, `)}]` : dice
 
-const formatRollResult = (name, roll, dice, operator, modifier, total) => {
+const formatRollResult = (roll, dice, operator, modifier, total) => {
   const modString = hasOperator(operator) ? ` ${operator} ${modifier}` : ``
   const manyDice = dice.length > 1
   const result = manyDice || hasOperator(operator) ? `${formatDice(dice)}${modString} = ${total}` : total
-  return `${name} rolled ${roll} and got: ${result}`
+  return result
 }
 
-const getMessage = (msg) => ({ name: `Server`, msg })
+const invalidCommand = `Invalid command, please try something like /roll 2d10+33`
+const aboveLimit = `Please try at max ${maxDice} dice with no more than ${maxSides} sides each.`
+const modifierTooBig = `The modifier value is too big`
 
-const invalidCommand = getMessage(`Invalid command, please try something like /roll 2d10+33`)
-
-const aboveLimit = getMessage(`Please try at max ${maxDice} dice with no more than ${maxSides} sides each.`)
-
-const modifierTooBig = getMessage(`The modifier value is too big`)
-
-const roll = (name, roll) => {
+const roll = (roll) => {
   const match = roll.match(rollRegex)
   if (match && match.length >= 4) {
     const [, dice,, sides, operator, modifier] = match
@@ -71,8 +67,8 @@ const roll = (name, roll) => {
 
     const diceResults = rollDice(dice, parseInt(sides))
     const total = sumResults(diceResults) + applyModifier(operator, modifierValue)
-    const responseMessage = formatRollResult(name, roll, diceResults, operator, modifierValue, total)
-    return Promise.resolve(getMessage(responseMessage))
+    const responseMessage = formatRollResult(roll, diceResults, operator, modifierValue, total)
+    return Promise.resolve(responseMessage)
   }
   return Promise.resolve(invalidCommand)
 }

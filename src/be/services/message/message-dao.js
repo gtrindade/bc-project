@@ -4,6 +4,7 @@ import {ObjectId} from 'mongodb'
 const PAGINATION_SIZE = 20
 const MESSAGES = `messages`
 
+const get = (_id) => db.collection(MESSAGES).find({_id: ObjectId(_id)}).toArray()
 const getAll = () => db.collection(MESSAGES).find({}).toArray()
 
 const getPaginatedFromTime = (time = Date.now()) =>
@@ -13,19 +14,22 @@ const getPaginatedFromTime = (time = Date.now()) =>
 const insert = (name, msg) => {
   const time = Date.now()
   if ( name && msg ) {
-    return db.collection(MESSAGES).insert({time, name, msg})
+    return db.collection(MESSAGES).insert({time, name, msg, editCount: 0})
   }
   return Promise.reject(new Error(`Invalid name (${name}) or message (${msg})`))
 }
 
-const update = (_id, name, msg) => {
+const update = (_id, payload, skipCount) => {
+  const {name, msg} = payload
   if ( _id && name && msg ) {
-    return db.collection(MESSAGES).update({_id: ObjectId(_id)}, {$set: {name, msg}})
+    const increment = skipCount ? {} : {$inc: {editCount: 1}}
+    return db.collection(MESSAGES).update({_id: ObjectId(_id)}, {$set: payload, ...increment})
   }
   return Promise.reject(new Error(`Invalid name (${name}) or message (${msg})`))
 }
 
 export default {
+  get,
   getPaginatedFromTime,
   getAll,
   insert,

@@ -13,7 +13,7 @@ const evaluate = (name, msg) => {
       switch (command) {
         case `roll`: {
           const input = tokens.slice(1, tokens.length).join(` `)
-          return dice.roll(name, input)
+          return dice.roll(input)
         }
         case `set`: {
           const [,path, ...value] = tokens
@@ -22,6 +22,10 @@ const evaluate = (name, msg) => {
         case `get`: {
           const [,path] = tokens
           return gamestate.get(path)
+        }
+        case `unset`: {
+          const [,path] = tokens
+          return gamestate.unset(path)
         }
       }
     }

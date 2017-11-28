@@ -32,8 +32,26 @@ export const init = (app) => {
 
   const updateHandler = ({name, msg, _id}) => {
     console.log(`update: [${name}]: `, msg, _id)
-    dao.update(_id, name, msg)
+    dao.update(_id, {name, msg})
       .then(() => {
+        const command = commands.evaluate(name, msg)
+
+        if (command && typeof command.then === `function`) {
+          command.then((response) => {
+            dao.update(_id, {name, msg, response}, true)
+              .then(() => {
+                return dao.get(_id)
+              })
+              .then((edited) => {
+                const [first] = edited
+                const {editCount} = first
+
+                io.emit(UPDATE, {_id, name, msg, response, editCount})
+              })
+              .catch(console.error)
+          })
+        }
+
         io.emit(UPDATE, {name, msg, _id})
       })
       .catch(console.error)
@@ -47,16 +65,21 @@ export const init = (app) => {
     dao.insert(name, msg)
       .then((created) => {
         const [message] = created.ops
-        io.emit(MESSAGE, message)
-        if (command) {
-          command.then((result) => {
-            dao.insert(result.name, result.msg)
+
+        if (command && typeof command.then === `function`) {
+          const {insertedIds} = created
+          const [_id] = insertedIds
+
+          command.then((response) => {
+            dao.update(_id, {name, msg, response}, true)
               .then(() => {
-                io.emit(MESSAGE, result)
+                io.emit(UPDATE, {_id, name, msg, response})
               })
               .catch(console.error)
           })
         }
+
+        io.emit(MESSAGE, message)
       })
       .catch(console.error)
   }
