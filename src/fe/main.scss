@@ -1,5 +1,11 @@
 @import './chat/chat.scss';
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background-color: #222;
 }
@@ -10,9 +16,11 @@ input {
 }
 
 .bc-project {
-  margin: 0 auto;
-  width: 800px;
   background-color: #111;
   color: #eee;
   padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }

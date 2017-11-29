@@ -173,7 +173,7 @@ const Chat = React.createClass({
     const editClass = editMode ? `edit-mode` : ``
 
     return(
-      <div>
+      <div className="chat-container">
         <h3>Chat</h3>
         <ChatLog
           log={history}

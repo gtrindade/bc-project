@@ -5,7 +5,7 @@ import Chat from './chat/chat'
 class App extends React.Component {
   render() {
     return(
-      <div>
+      <div className="bc-project">
         <h1>BC Project</h1>
         <Chat/>
       </div>
