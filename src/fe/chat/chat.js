@@ -185,14 +185,14 @@ const Chat = React.createClass({
           <input
             type="text"
             value={name}
-            placeholder="Name..."
+            placeholder="Name"
             onChange={this.handleNameChange}
             className={`name-field ${editClass}`}
           /> 
           <input
             type="text"
             value={msg}
-            placeholder="Message..."
+            placeholder="Message"
             onChange={this.handleMessageChange}
             onKeyDown={this.handleKeyPress}
             className={`message-field ${editClass}`}
@@ -200,7 +200,7 @@ const Chat = React.createClass({
           />
           <input
             type="submit"
-            value={editMode ? `update` : `submit`}
+            value={editMode ? `UPDATE` : `SEND`}
             onClick={this.handleSubmit}
             className="submit-button"
           />
