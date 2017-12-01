@@ -34,6 +34,8 @@
   margin: 15px 0;
   overflow-y: scroll;
   flex-grow: 1;
+  font-size: 13px;
+  font-weight: 100;
   div {
     padding: 5px;
   }
@@ -52,6 +54,7 @@
 .response {
   background-color: #454550;
   padding: 10px;
+  display: inline-block;
 }
 
 .edit-count {
