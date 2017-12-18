@@ -1,18 +1,48 @@
 import React from 'react'
 import io from 'socket.io-client'
-import ChatLog from './chat-log'
 import {
   MESSAGE, MESSAGES, MESSAGES_FROM, UPDATE, DISCONNECT, CONNECT
 } from '../constants'
 
 export const unformatRegex = /\[(.*)\]:\ (.*)/
 
+const LOAD_MORE = `Loading More...`
+const BEGINNING = `The Beginning`
+
 const Chat = React.createClass({
   getInitialState() {
     return {
       msg: ``,
       name: ``,
-      history: []
+      history: [],
+      loading: false,
+      loadHistoryText: LOAD_MORE
+    }
+  },
+
+  formatMessage(name, message) {
+    return `[${name}]: ${message}`
+  },
+
+  handleScroll: function(event) {
+    const {history, socket, loadHistoryText, loading} = this.state
+    const {scrollTop} = event.target
+
+    const [oldest] = history
+    const atTop = scrollTop < 10
+    const notBeginning = loadHistoryText !== BEGINNING
+    const hasTime = oldest && oldest.time
+    const notLoading = !loading
+
+    if (atTop && hasTime && notBeginning && notLoading) {
+      console.log(`will load`)
+      this.setState({
+        loading: true
+      })
+      setTimeout(() => {
+        console.log(`loading`)
+        socket.emit(MESSAGES_FROM, oldest.time)
+      }, 2000)
     }
   },
 
@@ -36,14 +66,46 @@ const Chat = React.createClass({
   },
 
   prependToHistory(messages) {
+    console.log(`got the messages, prepending`)
+    const {box} = this.refs
+
+    const resultLength = messages && messages.length
+    const loading = false
+    const history = messages.concat(this.state.history)
+    const loadHistoryText = resultLength > 0 ? LOAD_MORE : BEGINNING
+
     this.setState({
-      history: [...messages, ...this.state.history]
+      loadHistoryText,
+      history,
+      loading
+    }, () => {
+      const {scrollHeight} = this.state
+
+      console.log(`state scrollHeight`, scrollHeight)
+      console.log(`box.offsetHeight`, box.offsetHeight)
+      console.log(`box.scrollHeight`, box.scrollHeight)
+      console.log(`box.scrollTop`, box.scrollTop)
+
+      const deltaHeight = box.scrollHeight - scrollHeight
+      box.scrollTop = deltaHeight
+      this.setState({
+        scrollHeight: box.scrollHeight,
+      })
     })
   },
 
   appendToHistory(message) {
     this.setState({
       history: this.state.history.concat(message)
+    }, () => {
+      const {name} = this.state
+      const {box} = this.refs
+
+      const ownMessage = message.name === name
+      const atBottom = box.scrollHeight - (box.scrollTop + box.offsetHeight) <= 40
+      if (ownMessage || atBottom) {
+        box.scrollTop = box.scrollHeight
+      }
     })
   },
 
@@ -73,6 +135,13 @@ const Chat = React.createClass({
   },
 
   componentDidMount() {
+    setTimeout(() => {
+      const {box} = this.refs
+      box.scrollTop = box.scrollHeight
+    }, 100)
+  },
+
+  componentWillMount() {
     const socket = io()
     socket.on(MESSAGE, this.appendToHistory)
     socket.on(MESSAGES, this.replaceHistory)
@@ -167,20 +236,42 @@ const Chat = React.createClass({
     this.inputMessage.focus()
   },
 
+  renderLog(log, handler) {
+    const {socket} = this.state
+    if (socket && socket.connected) {
+      const {loadHistoryText} = this.state
+      const renderer = ({name, msg, _id, response, editCount}, i) => (
+        <div key={i}>
+          <div>
+            <span onClick={handler} id={_id}>
+              {this.formatMessage(name, msg)}
+            </span>
+            {response && editCount ? <i className="edit-count">{editCount}</i> : null}
+          </div>
+          {response ? <pre className="response">{response}</pre> : null}
+        </div>
+      )
+      return (
+        <div>
+          <div className="load-history">{loadHistoryText}</div>
+          {log.map(renderer)}
+        </div>
+      )
+    }
+    return <div>Connecting...</div>
+  },
+
   render() {
-    const {history, msg, name, _id, socket, scrollToBottom} = this.state
+    const {history, msg, name, _id} = this.state
     const editMode = !!_id
     const editClass = editMode ? `edit-mode` : ``
 
     return(
       <div className="chat-container">
         <h3>Chat</h3>
-        <ChatLog
-          log={history}
-          handleEdit={this.handleEdit}
-          socket={socket}
-          scrollToBottom={scrollToBottom}
-        />
+        <div onScroll={this.handleScroll} className="chat-log" ref="box">
+          {this.renderLog(history, this.handleEdit)}
+        </div>
         <div className="input-container">
           <input
             type="text"

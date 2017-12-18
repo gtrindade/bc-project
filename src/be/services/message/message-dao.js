@@ -1,7 +1,7 @@
 import {db} from '../../db'
 import {ObjectId} from 'mongodb'
 
-const PAGINATION_SIZE = 20
+const PAGINATION_SIZE = 40
 const MESSAGES = `messages`
 
 const get = (_id) => db.collection(MESSAGES).find({_id: ObjectId(_id)}).toArray()
