@@ -21,10 +21,10 @@ export const init = (app) => {
 
     dao.getPaginatedFromTime()
       .then((result) => {
-        io.emit(MESSAGES_FROM, result)
+        socket.emit(MESSAGES_FROM, result)
         socket.on(MESSAGE, messageHandler)
         socket.on(UPDATE, updateHandler)
-        socket.on(MESSAGES_FROM, paginatedMessagesHandler)
+        socket.on(MESSAGES_FROM, paginatedMessagesHandler(socket))
         socket.on(DISCONNECT, disconnectHandler(socket))
       })
       .catch(console.error)
@@ -84,10 +84,10 @@ export const init = (app) => {
       .catch(console.error)
   }
 
-  const paginatedMessagesHandler = (time) => {
+  const paginatedMessagesHandler = (socket) => (time) => {
     dao.getPaginatedFromTime(time)
       .then((result) => {
-        io.emit(MESSAGES_FROM, result)
+        socket.emit(MESSAGES_FROM, result)
       })
       .catch(console.error)
   }

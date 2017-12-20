@@ -35,14 +35,12 @@ const Chat = React.createClass({
     const notLoading = !loading
 
     if (atTop && hasTime && notBeginning && notLoading) {
-      console.log(`will load`)
       this.setState({
         loading: true
       })
       setTimeout(() => {
-        console.log(`loading`)
         socket.emit(MESSAGES_FROM, oldest.time)
-      }, 2000)
+      }, 500)
     }
   },
 
@@ -66,7 +64,6 @@ const Chat = React.createClass({
   },
 
   prependToHistory(messages) {
-    console.log(`got the messages, prepending`)
     const {box} = this.refs
 
     const resultLength = messages && messages.length
@@ -80,11 +77,6 @@ const Chat = React.createClass({
       loading
     }, () => {
       const {scrollHeight} = this.state
-
-      console.log(`state scrollHeight`, scrollHeight)
-      console.log(`box.offsetHeight`, box.offsetHeight)
-      console.log(`box.scrollHeight`, box.scrollHeight)
-      console.log(`box.scrollTop`, box.scrollTop)
 
       const deltaHeight = box.scrollHeight - scrollHeight
       box.scrollTop = deltaHeight
@@ -111,13 +103,21 @@ const Chat = React.createClass({
 
   updateHistory(message) {
     const {history} = this.state
-    this.setState({
-      history: history.map((log) => {
-        if (log._id == message._id) {
-          return message
+    const newHistory = history.map((log, i) => {
+      if (log._id == message._id) {
+        if (i == history.length - 1) {
+          setTimeout(() => {
+            const {box} = this.refs
+            box.scrollTop = box.scrollHeight
+          }, 300)
         }
-        return log
-      })
+        return message
+      }
+      return log
+    })
+
+    this.setState({
+      history: newHistory
     })
   },
 
@@ -138,7 +138,7 @@ const Chat = React.createClass({
     setTimeout(() => {
       const {box} = this.refs
       box.scrollTop = box.scrollHeight
-    }, 100)
+    }, 300)
   },
 
   componentWillMount() {
