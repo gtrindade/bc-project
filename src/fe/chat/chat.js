@@ -1,5 +1,6 @@
 import React from 'react'
 import io from 'socket.io-client'
+import {colors} from './color-util'
 import {
   MESSAGE, MESSAGES, MESSAGES_FROM, UPDATE, DISCONNECT, CONNECT
 } from '../constants'
@@ -12,10 +13,19 @@ const HEIGHT_THRESHOLD = 40
 const REDRAW_DELAY = 300
 const LOAD_HISTORY_DELAY = 500
 
+const initialState = {
+  msg: ``,
+  name: ``,
+  history: [],
+  loadHistoryText: LOAD_MORE,
+  scrollHeight: 0,
+  colorMap: {}
+}
+
 class Chat extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { msg: ``, name: ``, history: [], loadHistoryText: LOAD_MORE, scrollHeight: 0 }
+    this.state = initialState
   }
 
   handleScroll = (event) => {
@@ -55,7 +65,6 @@ class Chat extends React.Component {
   }
 
   delayedScrollToBottom = () => {
-    console.log(`toBottom`, this.box.scrollTop)
     setTimeout(() => { this.box.scrollTop = this.box.scrollHeight }, REDRAW_DELAY)
   }
 
@@ -63,6 +72,7 @@ class Chat extends React.Component {
     const resultLength = messages && messages.length
     const loadHistoryText = resultLength > 0 ? LOAD_MORE : BEGINNING
     const history = messages.concat(this.state.history)
+    messages.map((message) => this.updateColorMap(message.name))
 
     this.setState({ loadHistoryText, history, loading: false }, () => {
       const {scrollHeight} = this.box
@@ -75,6 +85,7 @@ class Chat extends React.Component {
 
   appendToHistory = (message) => {
     const history = this.state.history.concat(message)
+    this.updateColorMap(message.name)
     this.setState({ history }, () => {
       const {name} = this.state
       const {scrollHeight, scrollTop, offsetHeight} = this.box
@@ -95,12 +106,24 @@ class Chat extends React.Component {
         if (index === historyLength - 1) {
           this.delayedScrollToBottom()
         }
+        this.updateColorMap(message.name)
         return message
       }
       return log
     })
 
     this.setState({ history: newHistory })
+  }
+
+  updateColorMap = (name) => {
+    const {colorMap} = this.state
+    if (colorMap[name]) {
+      return colorMap[name]
+    }
+    
+    const current = Object.keys(colorMap).length
+    colorMap[name] = colors[current % colors.length]
+    this.setState({colorMap})
   }
 
   disconnectHandler = () => {
@@ -201,12 +224,13 @@ class Chat extends React.Component {
   }
 
   renderLog = (log, handler) => {
-    const {socket, loadHistoryText} = this.state
+    const {socket, loadHistoryText, colorMap} = this.state
+
     if (socket && socket.connected) {
       const renderer = ({name, msg, _id, response, editCount}, i) => (
         <div key={i}>
           <div>
-            <span onClick={handler} id={_id}>
+            <span onClick={handler} id={_id} style={{color: colorMap[name]}}>
               {this.formatMessage(name, msg)}
             </span>
             {response && editCount ? <i className="edit-count">{editCount}</i> : null}
