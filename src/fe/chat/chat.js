@@ -44,10 +44,6 @@ class Chat extends React.Component {
     }
   }
 
-  formatMessage = (name, message) => {
-    return `[${name}]: ${message}`
-  }
-
   exitEditMode = () => {
     this.setState({ _id: undefined, msg: `` })
   }
@@ -230,8 +226,8 @@ class Chat extends React.Component {
       const renderer = ({name, msg, _id, response, editCount}, i) => (
         <div key={i}>
           <div>
-            <span onClick={handler} id={_id} style={{color: colorMap[name]}}>
-              {this.formatMessage(name, msg)}
+            <span onClick={handler} id={_id}>
+              [<span style={{color: colorMap[name]}}>{name}</span>]: {msg}
             </span>
             {response && editCount ? <i className="edit-count">{editCount}</i> : null}
           </div>
