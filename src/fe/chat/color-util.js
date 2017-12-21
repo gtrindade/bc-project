@@ -1,5 +1,4 @@
 export const colors = [
-  `#FFFFFF`, //White
   `#ADD8E6`, //LightBlue
   `#FFA500`, //Orange
   `#00FFFF`, //Cyan

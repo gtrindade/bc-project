@@ -131,10 +131,6 @@ class Chat extends React.Component {
     this.setState({ connected: true })
   }
 
-  // componentDidMount = () => {
-    // this.delayedScrollToBottom()
-  // }
-
   componentWillMount = () => {
     const socket = io()
     socket.on(MESSAGE, this.appendToHistory)
