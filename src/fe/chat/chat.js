@@ -8,140 +8,115 @@ export const unformatRegex = /\[(.*)\]:\ (.*)/
 
 const LOAD_MORE = `Loading More...`
 const BEGINNING = `The Beginning`
+const HEIGHT_THRESHOLD = 40
+const REDRAW_DELAY = 300
+const LOAD_HISTORY_DELAY = 500
 
-const Chat = React.createClass({
-  getInitialState() {
-    return {
-      msg: ``,
-      name: ``,
-      history: [],
-      loading: false,
-      loadHistoryText: LOAD_MORE
-    }
-  },
+class Chat extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { msg: ``, name: ``, history: [], loadHistoryText: LOAD_MORE, scrollHeight: 0 }
+  }
 
-  formatMessage(name, message) {
-    return `[${name}]: ${message}`
-  },
-
-  handleScroll: function(event) {
+  handleScroll = (event) => {
     const {history, socket, loadHistoryText, loading} = this.state
     const {scrollTop} = event.target
 
     const [oldest] = history
-    const atTop = scrollTop < 10
+    const atTop = scrollTop < HEIGHT_THRESHOLD
     const notBeginning = loadHistoryText !== BEGINNING
     const hasTime = oldest && oldest.time
     const notLoading = !loading
 
     if (atTop && hasTime && notBeginning && notLoading) {
-      this.setState({
-        loading: true
-      })
-      setTimeout(() => {
-        socket.emit(MESSAGES_FROM, oldest.time)
-      }, 500)
+      this.setState({ loading: true })
+      setTimeout(() => socket.emit(MESSAGES_FROM, oldest.time), LOAD_HISTORY_DELAY)
     }
-  },
+  }
 
-  reset() {
-    this.setState({
-      _id: undefined,
-      msg: ``
-    })
-  },
+  formatMessage = (name, message) => {
+    return `[${name}]: ${message}`
+  }
 
-  clearHistory() {
-    this.setState({
-      history: []
-    })
-  },
+  exitEditMode = () => {
+    this.setState({ _id: undefined, msg: `` })
+  }
 
-  replaceHistory(messages) {
-    this.setState({
-      history: messages
-    })
-  },
+  clearMessage = () => {
+    this.setState({ msg: `` })
+  }
 
-  prependToHistory(messages) {
-    const {box} = this.refs
+  replaceHistory = (messages) => {
+    this.setState({ history: messages })
+  }
 
+  clearHistory = () => {
+    this.replaceHistory([])
+  }
+
+  delayedScrollToBottom = () => {
+    console.log(`toBottom`, this.box.scrollTop)
+    setTimeout(() => { this.box.scrollTop = this.box.scrollHeight }, REDRAW_DELAY)
+  }
+
+  prependToHistory = (messages) => {
     const resultLength = messages && messages.length
-    const loading = false
-    const history = messages.concat(this.state.history)
     const loadHistoryText = resultLength > 0 ? LOAD_MORE : BEGINNING
+    const history = messages.concat(this.state.history)
 
-    this.setState({
-      loadHistoryText,
-      history,
-      loading
-    }, () => {
-      const {scrollHeight} = this.state
+    this.setState({ loadHistoryText, history, loading: false }, () => {
+      const {scrollHeight} = this.box
+      const deltaHeight = scrollHeight - this.state.scrollHeight
+      this.box.scrollTop = deltaHeight
 
-      const deltaHeight = box.scrollHeight - scrollHeight
-      box.scrollTop = deltaHeight
-      this.setState({
-        scrollHeight: box.scrollHeight,
-      })
+      this.setState({ scrollHeight })
     })
-  },
+  }
 
-  appendToHistory(message) {
-    this.setState({
-      history: this.state.history.concat(message)
-    }, () => {
+  appendToHistory = (message) => {
+    const history = this.state.history.concat(message)
+    this.setState({ history }, () => {
       const {name} = this.state
-      const {box} = this.refs
+      const {scrollHeight, scrollTop, offsetHeight} = this.box
 
       const ownMessage = message.name === name
-      const atBottom = box.scrollHeight - (box.scrollTop + box.offsetHeight) <= 40
+      const atBottom = scrollHeight - (scrollTop + offsetHeight) <= HEIGHT_THRESHOLD
       if (ownMessage || atBottom) {
-        box.scrollTop = box.scrollHeight
+        this.delayedScrollToBottom()
       }
     })
-  },
+  }
 
-  updateHistory(message) {
+  updateHistory = (message) => {
     const {history} = this.state
-    const newHistory = history.map((log, i) => {
-      if (log._id == message._id) {
-        if (i == history.length - 1) {
-          setTimeout(() => {
-            const {box} = this.refs
-            box.scrollTop = box.scrollHeight
-          }, 300)
+    const historyLength = history.length
+    const newHistory = history.map((log, index) => {
+      if (log._id === message._id) {
+        if (index === historyLength - 1) {
+          this.delayedScrollToBottom()
         }
         return message
       }
       return log
     })
 
-    this.setState({
-      history: newHistory
-    })
-  },
+    this.setState({ history: newHistory })
+  }
 
-  disconnectHandler() {
+  disconnectHandler = () => {
     this.clearHistory()
-    this.setState({
-      connected: false
-    })
-  },
+    this.setState({ connected: false })
+  }
 
-  connectHandler() {
-    this.setState({
-      connected: true
-    })
-  },
+  connectHandler = () => {
+    this.setState({ connected: true })
+  }
 
-  componentDidMount() {
-    setTimeout(() => {
-      const {box} = this.refs
-      box.scrollTop = box.scrollHeight
-    }, 300)
-  },
+  // componentDidMount = () => {
+    // this.delayedScrollToBottom()
+  // }
 
-  componentWillMount() {
+  componentWillMount = () => {
     const socket = io()
     socket.on(MESSAGE, this.appendToHistory)
     socket.on(MESSAGES, this.replaceHistory)
@@ -150,9 +125,9 @@ const Chat = React.createClass({
     socket.on(DISCONNECT, this.disconnectHandler)
     socket.on(CONNECT, this.connectHandler)
     this.setState({ socket })
-  },
+  }
 
-  getLastMessage() {
+  getLastMessage = () => {
     const {history, name} = this.state
     const length = history.length
     for (let i = length - 1; i >= 0; i--) {
@@ -160,86 +135,74 @@ const Chat = React.createClass({
         return history[i]
       }
     }
-  },
+  }
 
-  handleSubmit() {
-    const {msg, name, _id} = this.state
-    const editMode = !!_id
+  handleSubmit = () => {
+    const {msg, name, _id, socket} = this.state
+
     if (name && msg) {
-      const {socket} = this.state
+      const editMode = !!_id
       const message = {name, msg, _id}
+
       if (editMode) {
         socket.emit(UPDATE, message)
-        this.reset()
+        this.exitEditMode()
       } else {
         socket.emit(MESSAGE, message)
-        this.setState({
-          _id: undefined,
-          scrollToBottom: true,
-          msg: ``,
-          name
-        })
-        setTimeout(() => {
-          this.setState({
-            scrollToBottom: false
-          })
-        }, 500)
+        this.clearMessage()
       }
     }
-  },
+  }
 
-  handleNameChange(e) {
+  handleNameChange = (e) => {
     const {target: {value}} = e
     this.setState({ name: value })
-  },
+  }
 
-  handleMessageChange(e) {
+  handleMessageChange = (e) => {
     const {target: {value}} = e
     this.setState({ msg: value })
-  },
+  }
 
-  handleKeyPress(e) {
+  handleKeyPress = (e) => {
     const {name, _id} = this.state
     const {key} = e
-    let last
     switch (key) {
-      case `ArrowUp`:
+      case `ArrowUp`: {
         if (!name) return
-        last = this.getLastMessage()
-        this.setState({
-          name: last.name,
-          msg: last.msg,
-          _id: last._id
-        }, () => {
+
+        const last = this.getLastMessage()
+        this.setState({...last}, () => {
           this.inputMessage.blur()
-          setTimeout(() => {
-            this.inputMessage.focus()
-          }, 200)
+          setTimeout(() => { this.inputMessage.focus() }, REDRAW_DELAY)
         })
         break
-      case `Enter`:
+      }
+      case `Enter`: {
         this.handleSubmit()
         break
-      case `Escape`:
+      }
+      case `Escape`: {
         if (_id) {
-          this.setState({ msg: ``, _id: undefined })
+          this.exitEditMode()
         }
         break
+      }
     }
-  },
+  }
 
-  handleEdit(e) {
+  handleEdit = (e) => {
     const {target} = e
+    const {id: _id} = target
     const [,name, msg] = target.innerHTML.match(unformatRegex)
-    const {id} = target
-    this.setState({ name, msg, _id: id})
-    this.inputMessage.focus()
-  },
 
-  renderLog(log, handler) {
-    const {socket} = this.state
+    this.setState({ name, msg, _id})
+    this.inputMessage.focus()
+  }
+
+  renderLog = (log, handler) => {
+    const {socket, loadHistoryText} = this.state
     if (socket && socket.connected) {
-      const {loadHistoryText} = this.state
       const renderer = ({name, msg, _id, response, editCount}, i) => (
         <div key={i}>
           <div>
@@ -259,7 +222,7 @@ const Chat = React.createClass({
       )
     }
     return <div>Connecting...</div>
-  },
+  }
 
   render() {
     const {history, msg, name, _id} = this.state
@@ -269,7 +232,11 @@ const Chat = React.createClass({
     return(
       <div className="chat-container">
         <h3>Chat</h3>
-        <div onScroll={this.handleScroll} className="chat-log" ref="box">
+        <div
+          onScroll={this.handleScroll}
+          className="chat-log"
+          ref={(ref) => {this.box = ref}}
+        >
           {this.renderLog(history, this.handleEdit)}
         </div>
         <div className="input-container">
@@ -299,6 +266,6 @@ const Chat = React.createClass({
       </div>
     )
   }
-})
+}
 
 export default Chat

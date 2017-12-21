@@ -5,8 +5,12 @@
     "node": true
   },
   "extends": "eslint:recommended",
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaFeatures": {
+      "modules":true,
+      "arrowFunctions":true,
+      "classes":true,
       "jsx": true,
       "experimentalObjectRestSpread": true
     },
