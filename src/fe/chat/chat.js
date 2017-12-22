@@ -5,8 +5,6 @@ import {
   MESSAGE, MESSAGES, MESSAGES_FROM, UPDATE, DISCONNECT, CONNECT
 } from '../constants'
 
-export const unformatRegex = /\[(.*)\]:\ (.*)/
-
 const LOAD_MORE = `Loading More...`
 const BEGINNING = `The Beginning`
 const HEIGHT_THRESHOLD = 40
@@ -32,7 +30,6 @@ class Chat extends React.Component {
 
   newMessageWatcher = () => {
     const {newMessages} = this.state
-    console.log(`newMessages`, newMessages)
     document.title = `${newMessages ? `(${newMessages}) ` : ``}BC Project`
     if (!document.hidden) {
       this.setState({hidden: false, newMessages: 0})
@@ -165,6 +162,7 @@ class Chat extends React.Component {
 
   connectHandler = () => {
     this.setState({ connected: true })
+    this.delayedScrollToBottom()
   }
 
   componentWillMount = () => {
