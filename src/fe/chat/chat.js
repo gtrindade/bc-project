@@ -14,18 +14,43 @@ const REDRAW_DELAY = 300
 const LOAD_HISTORY_DELAY = 500
 
 const initialState = {
-  msg: ``,
-  name: ``,
-  history: [],
-  loadHistoryText: LOAD_MORE,
-  scrollHeight: 0,
-  colorMap: {}
+  msg: ``, // The message that will be sent
+  name: ``, // The name defined by user
+  history: [], // All the messages in the history
+  loadHistoryText: LOAD_MORE, // The message on the top before/after loading history
+  scrollHeight: 0, // Keeping the scrollHeight since last render
+  colorMap: {}, // A Map from names to colors
+  hidden: false, // Is the tab focused or not?
+  newMessages: 0 // How many new messages since tab was made hidden?
 }
 
 class Chat extends React.Component {
   constructor(props) {
     super(props)
     this.state = initialState
+  }
+
+  newMessageWatcher = () => {
+    const {newMessages} = this.state
+    console.log(`newMessages`, newMessages)
+    document.title = `${newMessages ? `(${newMessages}) ` : ``}BC Project`
+    if (!document.hidden) {
+      this.setState({hidden: false, newMessages: 0})
+    } else {
+      this.setState({hidden: true})
+    }
+  }
+
+  clearNewMessages = () => {
+    setTimeout(() => {
+      const {history} = this.state
+      const length = history.length
+      for (let i = length - 1; i >= 0; i--) {
+        if (history[i].newClassName) {
+          delete history[i].newClassName
+        }
+      }
+    }, REDRAW_DELAY)
   }
 
   handleScroll = (event) => {
@@ -64,6 +89,15 @@ class Chat extends React.Component {
     setTimeout(() => { this.box.scrollTop = this.box.scrollHeight }, REDRAW_DELAY)
   }
 
+  updateNewMessages = (message) => {
+    if (document.hidden) {
+      message.newClassName = `new-message`
+      this.setState({ newMessages: this.state.newMessages + 1 })
+    } else {
+      this.setState({ newMessages: 0 })
+    }
+  }
+
   prependToHistory = (messages) => {
     const resultLength = messages && messages.length
     const loadHistoryText = resultLength > 0 ? LOAD_MORE : BEGINNING
@@ -82,6 +116,7 @@ class Chat extends React.Component {
   appendToHistory = (message) => {
     const history = this.state.history.concat(message)
     this.updateColorMap(message.name)
+    this.updateNewMessages(message)
     this.setState({ history }, () => {
       const {name} = this.state
       const {scrollHeight, scrollTop, offsetHeight} = this.box
@@ -97,6 +132,7 @@ class Chat extends React.Component {
   updateHistory = (message) => {
     const {history} = this.state
     const historyLength = history.length
+    this.updateNewMessages(message)
     const newHistory = history.map((log, index) => {
       if (log._id === message._id) {
         if (index === historyLength - 1) {
@@ -140,6 +176,14 @@ class Chat extends React.Component {
     socket.on(DISCONNECT, this.disconnectHandler)
     socket.on(CONNECT, this.connectHandler)
     this.setState({ socket })
+    setInterval(this.newMessageWatcher, 1000)
+    document.addEventListener(`visibilitychange`, () => {
+      this.setState({hidden: document.hidden})
+
+      if (!document.hidden) {
+        this.clearNewMessages()
+      }
+    })
   }
 
   getLastMessage = () => {
@@ -209,18 +253,28 @@ class Chat extends React.Component {
   handleEdit = (e) => {
     const {target} = e
     const {id: _id} = target
-    const [,name, msg] = target.innerHTML.match(unformatRegex)
+    const {name, msg} = this.findById(_id)
 
     this.setState({ name, msg, _id})
     this.inputMessage.focus()
+  }
+
+  findById = (id) => {
+    const {history} = this.state
+    const length = history.length
+    for (let i = length - 1; i >= 0; i--) {
+      if (id === history[i]._id) {
+        return history[i]
+      }
+    }
   }
 
   renderLog = (log, handler) => {
     const {socket, loadHistoryText, colorMap} = this.state
 
     if (socket && socket.connected) {
-      const renderer = ({name, msg, _id, response, editCount}, i) => (
-        <div key={i}>
+      const renderer = ({name, msg, _id, response, editCount, newClassName}, i) => (
+        <div key={i} className={newClassName}>
           <div>
             <span onClick={handler} id={_id}>
               [<span style={{color: colorMap[name]}}>{name}</span>]: {msg}

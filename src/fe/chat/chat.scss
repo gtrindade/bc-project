@@ -38,6 +38,7 @@
   font-weight: 100;
   div {
     padding: 5px;
+    transition: background-color 3s ease;
   }
 }
 
@@ -59,4 +60,8 @@
 
 .edit-count {
   float: right;
+}
+
+.new-message {
+  background-color: black;
 }
