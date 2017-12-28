@@ -2,14 +2,18 @@ import dice from '../dice/dice'
 import gamestate from '../game-state/game-state'
 
 const PREFIX = `/`
+const HIDDEN_PREFIX = `//`
 
-const isCommand = (text) => text && text.startsWith(PREFIX)
+const hasPrefix = prefix => text => text && text.startsWith(prefix)
+const isCommand = hasPrefix(PREFIX)
+const isHiddenCommand = hasPrefix(HIDDEN_PREFIX)
 
 const evaluate = (name, msg) => {
   if (isCommand(msg)) {
     const tokens = msg.split(` `)
     if (tokens[0]) {
-      const command = tokens[0].substring(1, tokens[0].length)
+      const prefixLength = isHiddenCommand(msg) ? 2 : 1
+      const command = tokens[0].substring(prefixLength, tokens[0].length)
       switch (command) {
         case `roll`: {
           const input = tokens.slice(1, tokens.length).join(` `)
@@ -32,6 +36,9 @@ const evaluate = (name, msg) => {
   }
 }
 
+const isHidden = msg => isHiddenCommand(msg)
+
 export default {
-  evaluate
+  evaluate,
+  isHidden
 }

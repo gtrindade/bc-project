@@ -2,6 +2,23 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  padding: 20px;
+  background-color: #2f2f30;
+}
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.chat-header {
+  background-color: black;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 5px;
+  height: 30px;
 }
 
 .input-container {
@@ -10,6 +27,7 @@
 
   input {
     padding: 5px;
+    box-sizing: border-box;
   }
 }
 

@@ -1,5 +1,7 @@
 @import './chat/chat.scss';
 
+$default-font-color: #eee;
+
 html, body {
   height: 100%;
   margin: 0;
@@ -17,11 +19,13 @@ input {
 }
 
 .bc-project {
-  background-color: #2f2f30;
-  color: #eee;
-  padding: 20px;
   height: 100vh;
+  color: $default-font-color;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+}
+
+.logout-button {
+  color: $default-font-color;
+  cursor: pointer;
 }

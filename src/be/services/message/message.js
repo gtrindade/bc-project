@@ -22,7 +22,7 @@ export const init = (app) => {
     dao.getPaginatedFromTime()
       .then((result) => {
         socket.emit(MESSAGES_FROM, result)
-        socket.on(MESSAGE, messageHandler)
+        socket.on(MESSAGE, messageHandler(socket))
         socket.on(UPDATE, updateHandler)
         socket.on(MESSAGES_FROM, paginatedMessagesHandler(socket))
         socket.on(DISCONNECT, disconnectHandler(socket))
@@ -57,7 +57,7 @@ export const init = (app) => {
       .catch(console.error)
   }
 
-  const messageHandler = ({name, msg}) => {
+  const messageHandler = socket => ({name, msg}) => {
     console.log(`[${name}]: `, msg)
 
     const command = commands.evaluate(name, msg)
@@ -73,7 +73,12 @@ export const init = (app) => {
           command.then((response) => {
             dao.update(_id, {name, msg, response}, true)
               .then(() => {
-                io.emit(UPDATE, {_id, name, msg, response})
+                const commandResponse = {_id, name, msg, response}
+                if (commands.isHidden(msg)) {
+                  socket.emit(UPDATE, commandResponse)
+                } else {
+                  io.emit(UPDATE, commandResponse)
+                }
               })
               .catch(console.error)
           })
@@ -84,7 +89,7 @@ export const init = (app) => {
       .catch(console.error)
   }
 
-  const paginatedMessagesHandler = (socket) => (time) => {
+  const paginatedMessagesHandler = socket => time => {
     dao.getPaginatedFromTime(time)
       .then((result) => {
         socket.emit(MESSAGES_FROM, result)
