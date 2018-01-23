@@ -4,4 +4,6 @@ public/
 dist/
 node_modules
 npm-debug.log
-start.sh
+
+#script to start with all credentials
+run

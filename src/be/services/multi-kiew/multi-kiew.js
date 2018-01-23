@@ -10,13 +10,14 @@ const getMessageQuery = (chatId, message) => `?chat_id=${chatId}&text=${message}
 
 const messageEndpoint = (id, msg) => `${domain}${bot}${sendMessagePath}${getMessageQuery(id, msg)}`
 
-const sendMessage = (msg) => {
-  request.post(messageEndpoint(pingChat, msg), {}, (error) => {
+const sendMessage = (msg) => new Promise((resolve, reject) => {
+  return request.post(messageEndpoint(pingChat, msg), {}, (error, response) => {
     if (error) { 
-      console.log(`error: `, error)
+      reject(error)
     }
+    resolve(response)
   })
-}
+})
 
 export default {
   sendMessage

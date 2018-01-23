@@ -15,28 +15,36 @@ const evaluate = (name, msg) => {
     if (tokens[0]) {
       const prefixLength = isHiddenCommand(msg) ? 2 : 1
       const command = tokens[0].substring(prefixLength, tokens[0].length)
+      let promise, shouldSave = true
       switch (command) {
         case `roll`: {
           const input = tokens.slice(1, tokens.length).join(` `)
-          return dice.roll(input)
+          promise = dice.roll(input)
+          break
         }
         case `set`: {
           const [,path, ...value] = tokens
-          return gamestate.set(path, value.join(` `))
+          promise = gamestate.set(path, value.join(` `))
+          break
         }
         case `get`: {
           const [,path] = tokens
-          return gamestate.get(path)
+          promise = gamestate.get(path)
+          break
         }
         case `unset`: {
           const [,path] = tokens
-          return gamestate.unset(path)
+          promise = gamestate.unset(path)
+          break
         }
         case `ping`: {
           const [,...message] = tokens
-          return multikiew.sendMessage(message.join(` `))
+          promise = multikiew.sendMessage(message.join(` `))
+          shouldSave = false
+          break
         }
       }
+      return { shouldSave, promise }
     }
   }
 }

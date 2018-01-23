@@ -48,8 +48,8 @@ export const init = (app) => {
       .then(() => {
         const command = commands.evaluate(name, msg)
 
-        if (command && typeof command.then === `function`) {
-          command.then((response) => {
+        if (command && command.promise && typeof command.promise.then === `function`) {
+          command.promise.then((response) => {
             dao.update(_id, {name, msg, response}, true)
               .then(() => {
                 return dao.get(_id)
@@ -74,31 +74,34 @@ export const init = (app) => {
 
     const command = commands.evaluate(name, msg)
 
-    dao.insert(name, msg)
-      .then((created) => {
-        const [message] = created.ops
+    if (command.shouldSave) {
+      dao.insert(name, msg)
+        .then((created) => {
+          const [message] = created.ops
+          const {promise: commandPromise} = command
 
-        if (command && typeof command.then === `function`) {
-          const {insertedIds} = created
-          const [_id] = insertedIds
+          if (commandPromise && typeof commandPromise.then === `function`) {
+            const {insertedIds} = created
+            const [_id] = insertedIds
 
-          command.then((response) => {
-            dao.update(_id, {name, msg, response}, true)
-              .then(() => {
-                const commandResponse = {_id, name, msg, response}
-                if (commands.isHidden(msg)) {
-                  socket.emit(UPDATE, commandResponse)
-                } else {
-                  io.emit(UPDATE, commandResponse)
-                }
-              })
-              .catch(console.error)
-          })
-        }
+            commandPromise.then((response) => {
+              dao.update(_id, {name, msg, response}, true)
+                .then(() => {
+                  const commandResponse = {_id, name, msg, response}
+                  if (commands.isHidden(msg)) {
+                    socket.emit(UPDATE, commandResponse)
+                  } else {
+                    io.emit(UPDATE, commandResponse)
+                  }
+                })
+                .catch(console.error)
+            })
+          }
 
-        io.emit(MESSAGE, message)
-      })
-      .catch(console.error)
+          io.emit(MESSAGE, message)
+        })
+        .catch(console.error)
+    }
   }
 
   const paginatedMessagesHandler = socket => time => {
