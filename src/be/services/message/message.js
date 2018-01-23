@@ -74,11 +74,11 @@ export const init = (app) => {
 
     const command = commands.evaluate(name, msg)
 
-    if (command.shouldSave) {
+    if (!command || command.shouldSave) {
       dao.insert(name, msg)
         .then((created) => {
           const [message] = created.ops
-          const {promise: commandPromise} = command
+          const {promise: commandPromise} = command || {}
 
           if (commandPromise && typeof commandPromise.then === `function`) {
             const {insertedIds} = created
