@@ -1,6 +1,14 @@
 import socketIo from 'socket.io'
 import dao from './message-dao'
 import commands from '../commands/commands'
+// import jwt from 'jsonwebtoken'
+
+// const getCookie = (input, name) => {
+  // const cookies = input.split(`;`)
+  // const pairs = cookies.map((cookie) => cookie.split(`=`))
+  // const target = pairs.find((item) => item[0] == name)
+  // return target && target[1]
+// }
 
 export const init = (app) => {
   const io = socketIo(app.server)
@@ -18,6 +26,10 @@ export const init = (app) => {
 
   const connectionHandler = (socket) => {
     console.log(`User ${socket.id} connected`)
+    // const token = getCookie(socket.handshake.headers.cookie, `session`)
+    // console.log(`token`, token)
+    // const profile = jwt.verify(token, `secret`)
+    // console.log(`profile`, profile)
 
     dao.getPaginatedFromTime()
       .then((result) => {

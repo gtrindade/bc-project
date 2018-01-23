@@ -1,5 +1,6 @@
 import dice from '../dice/dice'
 import gamestate from '../game-state/game-state'
+import multikiew from '../multi-kiew/multi-kiew'
 
 const PREFIX = `/`
 const HIDDEN_PREFIX = `//`
@@ -30,6 +31,10 @@ const evaluate = (name, msg) => {
         case `unset`: {
           const [,path] = tokens
           return gamestate.unset(path)
+        }
+        case `ping`: {
+          const [,...message] = tokens
+          return multikiew.sendMessage(message.join(` `))
         }
       }
     }
