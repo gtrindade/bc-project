@@ -21,6 +21,9 @@
   height: 30px;
 }
 
+$break-small: 400px;
+$break-large: 1200px;
+
 .input-container {
   display: flex;
   min-height: 30px;
@@ -32,12 +35,12 @@
 }
 
 .name-field {
-  flex-grow: 0.5;
+  flex-grow: 1;
   margin-right: 10px;
 }
 
 .message-field {
-  flex-grow: 4;
+  flex-grow: 8;
   margin-right: 10px;
 }
 
@@ -83,3 +86,25 @@
 .new-message {
   background-color: black;
 }
+
+@media screen and (max-width: $break-small) {
+  .chat-log, .input-container input {
+    font-size: 20px;
+  }
+
+  .input-container {
+    min-height: 60px;
+
+    .name-field {
+      min-width: 0;
+    }
+    .message-field {
+      width: 100%;
+      margin-right: 0;
+    }
+    .submit-button {
+      display: none;
+    }
+  }
+}
+

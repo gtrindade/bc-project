@@ -90,6 +90,9 @@ class Chat extends React.Component {
     if (document.hidden) {
       message.newClassName = `new-message`
       this.setState({ newMessages: this.state.newMessages + 1 })
+      if (Notification) {
+        new Notification(`${message.name}: ${message.msg}`)
+      }
     } else {
       this.setState({ newMessages: 0 })
     }

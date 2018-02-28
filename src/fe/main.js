@@ -12,6 +12,12 @@ class App extends React.Component {
     }
   }
 
+  componentDidMount() {
+    if (Notification) {
+      Notification.requestPermission(console.log)
+    }
+  }
+
   render() {
     return(
       <div className="bc-project">
